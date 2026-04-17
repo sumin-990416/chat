@@ -16,7 +16,7 @@ function getInitial(name = '?') {
   return name.charAt(0).toUpperCase()
 }
 
-export default function Message({ msg, isOwn, showAvatar }) {
+export default function Message({ msg, isOwn, showAvatar, memberCount, readCount }) {
   return (
     <div className={`message ${isOwn ? 'own' : ''} ${showAvatar ? 'show-avatar' : ''}`}>
       {!isOwn && (
@@ -25,7 +25,7 @@ export default function Message({ msg, isOwn, showAvatar }) {
         </div>
       )}
       <div className="message-body">
-        {showAvatar && !isOwn && (
+        {showAvatar && (
           <div className="message-meta">
             <span className="message-name">{msg.displayName}</span>
             <span className="message-time">{formatTime(msg.createdAt)}</span>
@@ -34,7 +34,10 @@ export default function Message({ msg, isOwn, showAvatar }) {
         {msg.type === 'text' && (
           <div className="bubble text-bubble">
             <p>{msg.content}</p>
-            {isOwn && <span className="bubble-time">{formatTime(msg.createdAt)}</span>}
+            <div className="bubble-footer">
+              {memberCount > 1 && <span className="read-count">{readCount}/{memberCount}</span>}
+              <span className="bubble-time">{formatTime(msg.createdAt)}</span>
+            </div>
           </div>
         )}
         {msg.type === 'image' && (
@@ -42,7 +45,10 @@ export default function Message({ msg, isOwn, showAvatar }) {
             <a href={msg.content} target="_blank" rel="noreferrer">
               <img src={msg.content} alt={msg.fileName || '이미지'} />
             </a>
-            {isOwn && <span className="bubble-time">{formatTime(msg.createdAt)}</span>}
+            <div className="bubble-footer">
+              {memberCount > 1 && <span className="read-count">{readCount}/{memberCount}</span>}
+              <span className="bubble-time">{formatTime(msg.createdAt)}</span>
+            </div>
           </div>
         )}
         {msg.type === 'file' && (
@@ -55,7 +61,10 @@ export default function Message({ msg, isOwn, showAvatar }) {
               </span>
               <span className="file-dl">⬇</span>
             </a>
-            {isOwn && <span className="bubble-time">{formatTime(msg.createdAt)}</span>}
+            <div className="bubble-footer">
+              {memberCount > 1 && <span className="read-count">{readCount}/{memberCount}</span>}
+              <span className="bubble-time">{formatTime(msg.createdAt)}</span>
+            </div>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   collection, addDoc, onSnapshot, doc,
   query, orderBy, serverTimestamp, limit,
+  getDocs, updateDoc, arrayUnion,
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { db, storage } from '../firebase/config'
@@ -19,9 +20,13 @@ export default function ChatRoom({ user, onClose }) {
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(null)
-  const [copied, setCopied] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [inviteOpen, setInviteOpen] = useState(false)
+  const [inviteSearch, setInviteSearch] = useState('')
+  const [inviteResults, setInviteResults] = useState([])
+  const [friends, setFriends] = useState([])
+  const [filesOpen, setFilesOpen] = useState(false)
   const bottomRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -47,6 +52,32 @@ export default function ChatRoom({ user, onClose }) {
     })
     return unsub
   }, [roomId])
+
+  /* 친구 목록 */
+  useEffect(() => {
+    return onSnapshot(collection(db, 'users', user.uid, 'friends'), snap =>
+      setFriends(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    )
+  }, [user.uid])
+
+  /* 읽음 처리 */
+  useEffect(() => {
+    if (!roomId || !user.uid) return
+    const msgRef = collection(db, 'rooms', roomId, 'messages')
+    const unsub = onSnapshot(query(msgRef, orderBy('createdAt', 'asc'), limit(200)), (snap) => {
+      snap.docs.forEach(d => {
+        const data = d.data()
+        const readBy = data.readBy || []
+        if (!readBy.includes(user.uid)) {
+          updateDoc(d.ref, { readBy: arrayUnion(user.uid) }).catch(() => {})
+        }
+      })
+    })
+    return unsub
+  }, [roomId, user.uid])
+
+  /* 불필요한 파일 목록 */
+  const fileMessages = messages.filter(m => m.type === 'file' || m.type === 'image')
 
   /* 스크롤 아래로 */
   useEffect(() => {
@@ -116,12 +147,24 @@ export default function ChatRoom({ user, onClose }) {
     }
   }
 
-  const copyInviteLink = () => {
-    if (!room?.inviteCode) return
-    const url = `${window.location.origin}/chat/invite/${room.inviteCode}`
-    navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const handleInviteSearch = (val) => {
+    setInviteSearch(val)
+    if (!val.trim()) { setInviteResults([]); return }
+    const members = room?.members || []
+    const results = friends.filter(f =>
+      !members.includes(f.uid || f.id) &&
+      (f.displayName || '').toLowerCase().includes(val.toLowerCase())
+    )
+    setInviteResults(results)
+  }
+
+  const inviteFriend = async (friend) => {
+    const friendUid = friend.uid || friend.id
+    await updateDoc(doc(db, 'rooms', roomId), {
+      members: arrayUnion(friendUid)
+    })
+    setInviteSearch('')
+    setInviteResults([])
   }
 
   const filteredMessages = searchQuery.trim()
@@ -137,8 +180,8 @@ export default function ChatRoom({ user, onClose }) {
       <div className="chatroom-header">
         <span className="chatroom-hash">#</span>
         <span className="chatroom-title">{room?.name ?? '...'}</span>
-        <button className="btn-invite" onClick={copyInviteLink} title="초대 링크 복사">
-          {copied ? '✅ 복사됨' : '🔗 초대 링크'}
+        <button className={`btn-invite ${inviteOpen ? 'active' : ''}`} onClick={() => setInviteOpen(o => !o)} title="친구 초대">
+          👥 초대
         </button>
         <button
           className={`chatroom-icon-btn ${searchOpen ? 'active' : ''}`}
@@ -146,6 +189,13 @@ export default function ChatRoom({ user, onClose }) {
           title="검색"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button
+          className={`chatroom-icon-btn ${filesOpen ? 'active' : ''}`}
+          onClick={() => setFilesOpen(o => !o)}
+          title="파일 목록"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </button>
         {onClose && (
           <button className="chatroom-icon-btn" onClick={onClose} title="닫기">
@@ -171,6 +221,48 @@ export default function ChatRoom({ user, onClose }) {
         </div>
       )}
 
+      {inviteOpen && (
+        <div className="chatroom-invite-panel">
+          <input
+            autoFocus
+            placeholder="친구 이름으로 검색..."
+            value={inviteSearch}
+            onChange={e => handleInviteSearch(e.target.value)}
+          />
+          {inviteResults.length > 0 && (
+            <div className="invite-results">
+              {inviteResults.map(f => (
+                <div key={f.id} className="invite-item">
+                  <span>{f.displayName}</span>
+                  <button onClick={() => inviteFriend(f)}>초대</button>
+                </div>
+              ))}
+            </div>
+          )}
+          {inviteSearch && inviteResults.length === 0 && (
+            <p className="invite-empty">초대할 친구가 없습니다.</p>
+          )}
+        </div>
+      )}
+
+      {filesOpen && (
+        <div className="chatroom-files-panel">
+          <div className="files-panel-header">📁 전송된 파일 ({fileMessages.length})</div>
+          <div className="files-panel-list">
+            {fileMessages.length === 0 && <p className="files-empty">전송된 파일이 없습니다.</p>}
+            {fileMessages.map(m => (
+              <a key={m.id} className="files-item" href={m.content} target="_blank" rel="noreferrer">
+                <span className="files-icon">{m.type === 'image' ? '🖼️' : '📄'}</span>
+                <span className="files-info">
+                  <span className="files-name">{m.fileName || '이미지'}</span>
+                  <span className="files-sender">{m.displayName}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="chatroom-messages">
         {filteredMessages.length === 0 && (
           <div className="chatroom-empty">
@@ -183,6 +275,8 @@ export default function ChatRoom({ user, onClose }) {
             msg={msg}
             isOwn={msg.uid === user.uid}
             showAvatar={i === 0 || filteredMessages[i - 1]?.uid !== msg.uid}
+            memberCount={room?.members?.length || 1}
+            readCount={msg.readBy?.length || 0}
           />
         ))}
         <div ref={bottomRef} />

@@ -17,8 +17,8 @@ function Avatar({ photoURL, name, size = 32 }) {
 }
 
 export default function FriendList({ user }) {
-  const [searchEmail, setSearchEmail] = useState('')
-  const [searchResult, setSearchResult] = useState(null) // null | false | userObj
+  const [searchName, setSearchName] = useState('')
+  const [searchResults, setSearchResults] = useState(null) // null | [] 
   const [searching, setSearching] = useState(false)
   const [pendingIn, setPendingIn] = useState([])
   const [friends, setFriends] = useState([])
@@ -42,17 +42,16 @@ export default function FriendList({ user }) {
 
   const handleSearch = async (e) => {
     e.preventDefault()
-    const email = searchEmail.trim().toLowerCase()
-    if (!email) return
+    const name = searchName.trim()
+    if (!name) return
     setSearching(true)
-    setSearchResult(null)
+    setSearchResults(null)
     try {
-      const snap = await getDocs(query(collection(db, 'users'), where('email', '==', email)))
-      if (snap.empty || snap.docs[0].id === user.uid) {
-        setSearchResult(false)
-      } else {
-        setSearchResult({ id: snap.docs[0].id, ...snap.docs[0].data() })
-      }
+      const snap = await getDocs(collection(db, 'users'))
+      const results = snap.docs
+        .filter(d => d.id !== user.uid && (d.data().displayName || '').toLowerCase().includes(name.toLowerCase()))
+        .map(d => ({ id: d.id, ...d.data() }))
+      setSearchResults(results)
     } finally {
       setSearching(false)
     }
@@ -76,8 +75,8 @@ export default function FriendList({ user }) {
       status: 'pending',
       createdAt: serverTimestamp(),
     })
-    setSearchResult(null)
-    setSearchEmail('')
+    setSearchResults(null)
+    setSearchName('')
     alert('친구 요청을 보냈습니다!')
   }
 
@@ -107,26 +106,26 @@ export default function FriendList({ user }) {
     <div className="friend-list">
       <form className="friend-search-form" onSubmit={handleSearch}>
         <input
-          type="email"
-          placeholder="이메일로 친구 찾기"
-          value={searchEmail}
-          onChange={e => setSearchEmail(e.target.value)}
+          type="text"
+          placeholder="이름으로 친구 찾기"
+          value={searchName}
+          onChange={e => setSearchName(e.target.value)}
         />
         <button type="submit" className="btn-primary f-search-btn" disabled={searching}>
           {searching ? '...' : '검색'}
         </button>
       </form>
 
-      {searchResult === false && (
+      {searchResults !== null && searchResults.length === 0 && (
         <p className="f-not-found">사용자를 찾을 수 없습니다.</p>
       )}
-      {searchResult && (
-        <div className="f-result">
-          <Avatar photoURL={searchResult.photoURL} name={searchResult.displayName} />
-          <span className="f-name">{searchResult.displayName}</span>
-          <button className="btn-primary f-add-btn" onClick={() => sendRequest(searchResult)}>추가</button>
+      {searchResults && searchResults.length > 0 && searchResults.map(result => (
+        <div key={result.id} className="f-result">
+          <Avatar photoURL={result.photoURL} name={result.displayName} />
+          <span className="f-name">{result.displayName}</span>
+          <button className="btn-primary f-add-btn" onClick={() => sendRequest(result)}>추가</button>
         </div>
-      )}
+      ))}
 
       {pendingIn.length > 0 && (
         <div className="f-section">

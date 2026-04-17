@@ -4,7 +4,7 @@
   justify-content: center;
   min-height: 100dvh;
   padding: 20px;
-  background: radial-gradient(ellipse at top, #1a1040 0%, var(--bg) 60%);
+  background: var(--chat-bg-gradient);
 }
 
 .auth-card {

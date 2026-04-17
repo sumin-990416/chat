@@ -5,14 +5,14 @@
   justify-content: center;
   min-height: 100dvh;
   padding: 20px;
-  background: radial-gradient(ellipse at top, #1a1040 0%, var(--bg) 60%);
+  background: var(--chat-bg-gradient);
 }
 
 /* ===== 메인 카드 ===== */
 .chat-card {
   display: flex;
-  width: 90%;
-  max-width: 1200px;
+  width: 95%;
+  max-width: 1400px;
   height: 85vh;
   background: var(--bg2);
   border: 1px solid var(--border);
