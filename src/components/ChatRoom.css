@@ -168,22 +168,61 @@
 .btn-send:hover:not(:disabled) { background: var(--primary-dark); }
 .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ===== 초대 패널 ===== */
-.chatroom-invite-panel {
-  padding: 8px 16px;
-  background: var(--bg3);
-  border-bottom: 1px solid var(--border);
+/* ===== 초대 모달 ===== */
+.invite-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-backdrop);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
 }
-.chatroom-invite-panel input {
-  width: 100%;
+.invite-modal {
   background: var(--bg2);
   border: 1px solid var(--border);
-  color: var(--text);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 400px;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--modal-shadow);
+  animation: popIn 0.18s ease;
 }
-.chatroom-invite-panel input:focus { outline: none; border-color: var(--primary); }
+.invite-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.invite-modal-header h3 { font-size: 1rem; font-weight: 700; }
+.invite-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+}
+.invite-modal-close:hover { color: var(--text); }
+.invite-modal-body {
+  padding: 12px 20px 16px;
+  overflow-y: auto;
+}
+.invite-modal-body input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.invite-modal-body input:focus { outline: none; border-color: var(--primary); }
 .invite-results { margin-top: 6px; }
 .invite-item {
   display: flex;

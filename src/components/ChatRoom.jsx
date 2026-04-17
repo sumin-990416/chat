@@ -222,26 +222,34 @@ export default function ChatRoom({ user, onClose }) {
       )}
 
       {inviteOpen && (
-        <div className="chatroom-invite-panel">
-          <input
-            autoFocus
-            placeholder="친구 이름으로 검색..."
-            value={inviteSearch}
-            onChange={e => handleInviteSearch(e.target.value)}
-          />
-          {inviteResults.length > 0 && (
-            <div className="invite-results">
-              {inviteResults.map(f => (
-                <div key={f.id} className="invite-item">
-                  <span>{f.displayName}</span>
-                  <button onClick={() => inviteFriend(f)}>초대</button>
-                </div>
-              ))}
+        <div className="invite-modal-backdrop" onClick={() => setInviteOpen(false)}>
+          <div className="invite-modal" onClick={e => e.stopPropagation()}>
+            <div className="invite-modal-header">
+              <h3>👥 친구 초대</h3>
+              <button className="invite-modal-close" onClick={() => setInviteOpen(false)}>✕</button>
             </div>
-          )}
-          {inviteSearch && inviteResults.length === 0 && (
-            <p className="invite-empty">초대할 친구가 없습니다.</p>
-          )}
+            <div className="invite-modal-body">
+              <input
+                autoFocus
+                placeholder="친구 이름으로 검색..."
+                value={inviteSearch}
+                onChange={e => handleInviteSearch(e.target.value)}
+              />
+              {inviteResults.length > 0 && (
+                <div className="invite-results">
+                  {inviteResults.map(f => (
+                    <div key={f.id} className="invite-item">
+                      <span>{f.displayName}</span>
+                      <button onClick={() => inviteFriend(f)}>초대</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {inviteSearch && inviteResults.length === 0 && (
+                <p className="invite-empty">초대할 친구가 없습니다.</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
