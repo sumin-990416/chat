@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   signInAnonymously,
   updateProfile,
   GoogleAuthProvider,
   signInWithRedirect,
-  getRedirectResult,
 } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './AuthPage.css'
@@ -17,24 +16,12 @@ export default function AuthPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    setLoading(true)
-    getRedirectResult(auth)
-      .then((result) => {
-        if (!result) setLoading(false)
-        // 결과가 있으면 onAuthStateChanged가 App.jsx에서 처리
-      })
-      .catch((err) => {
-        setError(`Google 로그인에 실패했습니다. (${err.code})`)
-        setLoading(false)
-      })
-  }, [])
-
   const handleGoogle = async () => {
     setError('')
     setLoading(true)
     try {
       await signInWithRedirect(auth, googleProvider)
+      // 이후 Google 페이지로 이동 → 복귀 시 App.jsx의 getRedirectResult → onAuthStateChanged 처리
     } catch (err) {
       setError(`Google 로그인에 실패했습니다. (${err.code})`)
       setLoading(false)

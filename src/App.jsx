@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth'
 import { auth } from './firebase/config'
 import { useUserSync } from './hooks/useUserSync'
 import AuthPage from './pages/AuthPage'
@@ -12,8 +12,15 @@ function App() {
   const [user, setUser] = useState(undefined)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u))
-    return unsubscribe
+    let unsubscribe = () => {}
+    // getRedirectResult를 먼저 처리한 뒤 onAuthStateChanged 구독
+    // 순서를 지키지 않으면 redirect 복귀 시 null이 먼저 와서 로그인 페이지로 튕김
+    getRedirectResult(auth)
+      .catch(() => {})
+      .finally(() => {
+        unsubscribe = onAuthStateChanged(auth, (u) => setUser(u ?? null))
+      })
+    return () => unsubscribe()
   }, [])
 
   useUserSync(user)
