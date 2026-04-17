@@ -22,6 +22,25 @@
 .chatroom-title {
   font-weight: 600;
   font-size: 0.95rem;
+  flex: 1;
+}
+
+.btn-invite {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-invite:hover {
+  background: rgba(108, 99, 255, 0.2);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 /* ===== 메시지 목록 ===== */

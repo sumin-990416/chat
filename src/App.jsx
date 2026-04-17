@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './firebase/config'
 import AuthPage from './pages/AuthPage'
 import ChatPage from './pages/ChatPage'
+import InvitePage from './pages/InvitePage'
 import './App.css'
 
 function App() {
@@ -28,6 +29,10 @@ function App() {
         <Route
           path="/"
           element={user ? <Navigate to="/rooms" replace /> : <AuthPage />}
+        />
+        <Route
+          path="/invite/:inviteCode"
+          element={user ? <InvitePage user={user} /> : <AuthPage />}
         />
         <Route
           path="/rooms/*"

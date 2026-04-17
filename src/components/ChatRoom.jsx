@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  collection, addDoc, onSnapshot,
+  collection, addDoc, onSnapshot, doc,
   query, orderBy, serverTimestamp, limit,
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -14,12 +14,23 @@ const MAX_FILE_MB = 10
 
 export default function ChatRoom({ user }) {
   const { roomId } = useParams()
+  const [room, setRoom] = useState(null)
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(null)
+  const [copied, setCopied] = useState(false)
   const bottomRef = useRef(null)
   const fileInputRef = useRef(null)
+
+  /* 방 정보 구독 */
+  useEffect(() => {
+    if (!roomId) return
+    const unsub = onSnapshot(doc(db, 'rooms', roomId), (snap) => {
+      if (snap.exists()) setRoom({ id: snap.id, ...snap.data() })
+    })
+    return unsub
+  }, [roomId])
 
   /* 메시지 구독 */
   useEffect(() => {
@@ -103,11 +114,22 @@ export default function ChatRoom({ user }) {
     }
   }
 
+  const copyInviteLink = () => {
+    if (!room?.inviteCode) return
+    const url = `${window.location.origin}/chat/invite/${room.inviteCode}`
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="chatroom">
       <div className="chatroom-header">
         <span className="chatroom-hash">#</span>
-        <span className="chatroom-title">{roomId}</span>
+        <span className="chatroom-title">{room?.name ?? '...'}</span>
+        <button className="btn-invite" onClick={copyInviteLink} title="초대 링크 복사">
+          {copied ? '✅ 복사됨' : '🔗 초대 링크'}
+        </button>
       </div>
 
       <div className="chatroom-messages">

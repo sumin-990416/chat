@@ -25,7 +25,7 @@ export default function ChatPage({ user }) {
           </div>
           <button className="btn-ghost sidebar-logout" onClick={handleLogout} title="로그아웃">↪</button>
         </div>
-        <RoomList />
+        <RoomList user={user} />
       </aside>
 
       <main className="chat-main">

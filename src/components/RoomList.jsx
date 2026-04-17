@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import {
   collection, addDoc, onSnapshot,
-  query, orderBy, serverTimestamp,
+  query, serverTimestamp, where,
 } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { useNavigate, useParams } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 import './RoomList.css'
 
-export default function RoomList() {
+export default function RoomList({ user }) {
   const [rooms, setRooms] = useState([])
   const [newRoomName, setNewRoomName] = useState('')
   const [creating, setCreating] = useState(false)
@@ -15,12 +16,18 @@ export default function RoomList() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const q = query(collection(db, 'rooms'), orderBy('createdAt', 'desc'))
+    if (!user) return
+    const q = query(
+      collection(db, 'rooms'),
+      where('members', 'array-contains', user.uid),
+    )
     const unsub = onSnapshot(q, (snap) => {
-      setRooms(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      list.sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
+      setRooms(list)
     })
     return unsub
-  }, [])
+  }, [user])
 
   const createRoom = async (e) => {
     e.preventDefault()
@@ -31,6 +38,9 @@ export default function RoomList() {
       const docRef = await addDoc(collection(db, 'rooms'), {
         name,
         createdAt: serverTimestamp(),
+        createdBy: user.uid,
+        members: [user.uid],
+        inviteCode: uuidv4().replace(/-/g, '').slice(0, 12),
       })
       setNewRoomName('')
       navigate(`/rooms/${docRef.id}`)
