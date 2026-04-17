@@ -27,7 +27,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter basename="/chat">
+    <BrowserRouter>
       <Routes>
         <Route
           path="/"
