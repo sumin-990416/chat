@@ -19,6 +19,8 @@
   --radius: 12px;
   --radius-sm: 6px;
   --chat-bg-gradient: radial-gradient(ellipse at top, #1a1040 0%, #0f0f13 60%);
+  --modal-backdrop: rgba(0, 0, 0, 0.55);
+  --modal-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="light"] {
@@ -29,6 +31,8 @@
   --text: #1a1a2e;
   --text-muted: #666680;
   --chat-bg-gradient: radial-gradient(ellipse at top, #c8c0e8 0%, #f0f0f5 60%);
+  --modal-backdrop: rgba(0, 0, 0, 0.15);
+  --modal-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
 }
 
 body {

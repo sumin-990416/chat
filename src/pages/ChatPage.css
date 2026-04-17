@@ -141,7 +141,7 @@
 .chat-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--modal-backdrop);
   z-index: 50;
   animation: fadeIn 0.15s ease;
 }
@@ -157,7 +157,7 @@
   background: var(--bg2);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--modal-shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
