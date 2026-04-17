@@ -27,11 +27,11 @@ export default function AuthPage() {
     setLoading(true)
     try {
       await signInWithPopup(auth, googleProvider)
+      window.location.replace('/')
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-        setError('Google 로그인에 실패했습니다.')
+        setError(`Google 로그인에 실패했습니다. (${err.code})`)
       }
-    } finally {
       setLoading(false)
     }
   }
