@@ -17,6 +17,8 @@ function getInitial(name = '?') {
 }
 
 export default function Message({ msg, isOwn, showAvatar, memberCount, readCount }) {
+  const unread = memberCount > 1 ? memberCount - readCount : 0
+
   return (
     <div className={`message ${isOwn ? 'own' : ''} ${showAvatar ? 'show-avatar' : ''}`}>
       {!isOwn && (
@@ -31,42 +33,44 @@ export default function Message({ msg, isOwn, showAvatar, memberCount, readCount
             <span className="message-time">{formatTime(msg.createdAt)}</span>
           </div>
         )}
-        {msg.type === 'text' && (
-          <div className="bubble text-bubble">
-            <p>{msg.content}</p>
-            <div className="bubble-footer">
-              {memberCount > 1 && <span className="read-count">{readCount}/{memberCount}</span>}
+        <div className="bubble-row">
+          {isOwn && (
+            <div className="bubble-side">
+              {unread > 0 && <span className="unread-count">{unread}</span>}
               <span className="bubble-time">{formatTime(msg.createdAt)}</span>
             </div>
-          </div>
-        )}
-        {msg.type === 'image' && (
-          <div className="bubble image-bubble">
-            <a href={msg.content} target="_blank" rel="noreferrer">
-              <img src={msg.content} alt={msg.fileName || '이미지'} />
-            </a>
-            <div className="bubble-footer">
-              {memberCount > 1 && <span className="read-count">{readCount}/{memberCount}</span>}
+          )}
+          {msg.type === 'text' && (
+            <div className="bubble text-bubble">
+              <p>{msg.content}</p>
+            </div>
+          )}
+          {msg.type === 'image' && (
+            <div className="bubble image-bubble">
+              <a href={msg.content} target="_blank" rel="noreferrer">
+                <img src={msg.content} alt={msg.fileName || '이미지'} />
+              </a>
+            </div>
+          )}
+          {msg.type === 'file' && (
+            <div className="bubble file-bubble">
+              <a href={msg.content} target="_blank" rel="noreferrer" className="file-link">
+                <span className="file-icon">📄</span>
+                <span className="file-info">
+                  <span className="file-name">{msg.fileName}</span>
+                  <span className="file-size">{formatBytes(msg.fileSize)}</span>
+                </span>
+                <span className="file-dl">⬇</span>
+              </a>
+            </div>
+          )}
+          {!isOwn && (
+            <div className="bubble-side">
+              {unread > 0 && <span className="unread-count">{unread}</span>}
               <span className="bubble-time">{formatTime(msg.createdAt)}</span>
             </div>
-          </div>
-        )}
-        {msg.type === 'file' && (
-          <div className="bubble file-bubble">
-            <a href={msg.content} target="_blank" rel="noreferrer" className="file-link">
-              <span className="file-icon">📄</span>
-              <span className="file-info">
-                <span className="file-name">{msg.fileName}</span>
-                <span className="file-size">{formatBytes(msg.fileSize)}</span>
-              </span>
-              <span className="file-dl">⬇</span>
-            </a>
-            <div className="bubble-footer">
-              {memberCount > 1 && <span className="read-count">{readCount}/{memberCount}</span>}
-              <span className="bubble-time">{formatTime(msg.createdAt)}</span>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       {isOwn && <div className="avatar own-avatar">{getInitial(msg.displayName)}</div>}
     </div>
