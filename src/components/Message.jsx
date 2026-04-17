@@ -13,7 +13,8 @@ function formatBytes(bytes) {
 }
 
 function getInitial(name = '?') {
-  return name.charAt(0).toUpperCase()
+  const cleaned = name.replace(/[\[\](){}]/g, '').trim()
+  return (cleaned || '?').charAt(0).toUpperCase()
 }
 
 export default function Message({ msg, isOwn, showAvatar, memberCount, readCount }) {
