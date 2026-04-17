@@ -3,7 +3,7 @@ import {
   signInAnonymously,
   updateProfile,
   GoogleAuthProvider,
-  signInWithRedirect,
+  signInWithPopup,
 } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './AuthPage.css'
@@ -20,12 +20,11 @@ export default function AuthPage() {
     setError('')
     setLoading(true)
     try {
-      // localStorage 플래그 저장 → 복귀 시 App.jsx에서 감지해 로그인 페이지 플래시 방지
-      localStorage.setItem('googleLoginPending', '1')
-      await signInWithRedirect(auth, googleProvider)
+      await signInWithPopup(auth, googleProvider)
     } catch (err) {
-      localStorage.removeItem('googleLoginPending')
-      setError(`Google 로그인에 실패했습니다. (${err.code})`)
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        setError(`Google 로그인에 실패했습니다. (${err.code})`)
+      }
       setLoading(false)
     }
   }
