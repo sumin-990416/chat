@@ -104,8 +104,8 @@
 }
 
 .image-bubble img {
-  max-width: 240px;
-  max-height: 240px;
+  max-width: 160px;
+  max-height: 160px;
   border-radius: 10px;
   display: block;
   cursor: pointer;

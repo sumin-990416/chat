@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import RoomList from '../components/RoomList'
 import ChatRoom from '../components/ChatRoom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../firebase/config'
+import { useTheme } from '../context/ThemeContext'
 import './ChatPage.css'
 
 export default function ChatPage({ user }) {
   const navigate = useNavigate()
+  const { theme, toggle } = useTheme()
 
   const handleLogout = async () => {
     await signOut(auth)
@@ -23,7 +25,10 @@ export default function ChatPage({ user }) {
             <span className="sidebar-nickname">{user.displayName || '익명'}</span>
             <span className="sidebar-email">{user.isAnonymous ? '익명 사용자' : user.email}</span>
           </div>
-          <button className="btn-ghost sidebar-logout" onClick={handleLogout} title="로그아웃">↪</button>
+          <button className="btn-ghost sidebar-icon-btn" onClick={toggle} title="테마 전환">
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button className="btn-ghost sidebar-icon-btn" onClick={handleLogout} title="로그아웃">↪</button>
         </div>
         <RoomList user={user} />
       </aside>

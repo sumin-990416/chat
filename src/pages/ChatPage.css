@@ -58,6 +58,14 @@
   border: none;
 }
 
+.sidebar-icon-btn {
+  flex-shrink: 0;
+  padding: 5px 8px;
+  font-size: 1rem;
+  border: none;
+  line-height: 1;
+}
+
 /* ===== 메인 채팅 영역 ===== */
 .chat-main {
   flex: 1;
