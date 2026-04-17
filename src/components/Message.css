@@ -1,0 +1,156 @@
+.message {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.message.own {
+  flex-direction: row-reverse;
+}
+
+.message.show-avatar {
+  margin-top: 12px;
+}
+
+/* ===== 아바타 ===== */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.own-avatar {
+  background: var(--primary-dark);
+}
+
+/* ===== 말풍선 ===== */
+.message-body {
+  max-width: 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.message.own .message-body {
+  align-items: flex-end;
+}
+
+.message-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 4px 2px;
+}
+
+.message-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.message-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.bubble {
+  position: relative;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* 상대방 말풍선 */
+.message:not(.own) .bubble {
+  background: var(--bg3);
+  border-bottom-left-radius: 4px;
+  color: var(--text);
+}
+
+/* 내 말풍선 */
+.message.own .bubble {
+  background: var(--primary);
+  border-bottom-right-radius: 4px;
+  color: #fff;
+}
+
+.bubble-time {
+  font-size: 0.65rem;
+  opacity: 0.7;
+  display: block;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* ===== 이미지 말풍선 ===== */
+.image-bubble {
+  padding: 6px;
+  background: var(--bg3) !important;
+}
+
+.message.own .image-bubble {
+  background: rgba(108, 99, 255, 0.3) !important;
+}
+
+.image-bubble img {
+  max-width: 240px;
+  max-height: 240px;
+  border-radius: 10px;
+  display: block;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+/* ===== 파일 말풍선 ===== */
+.file-bubble {
+  min-width: 180px;
+}
+
+.file-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.file-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-size {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.file-dl {
+  font-size: 1rem;
+  opacity: 0.7;
+}
