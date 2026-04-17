@@ -3,7 +3,7 @@ import {
   signInAnonymously,
   updateProfile,
   GoogleAuthProvider,
-  signInWithRedirect,
+  signInWithPopup,
   getRedirectResult,
 } from 'firebase/auth'
 import { auth } from '../firebase/config'
@@ -18,19 +18,20 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
-    getRedirectResult(auth)
-      .catch(() => setError('Google 로그인에 실패했습니다.'))
-      .finally(() => setLoading(false))
+    // redirect 방식 fallback 처리
+    getRedirectResult(auth).catch(() => {})
   }, [])
 
   const handleGoogle = async () => {
     setError('')
     setLoading(true)
     try {
-      await signInWithRedirect(auth, googleProvider)
-    } catch {
-      setError('Google 로그인에 실패했습니다.')
+      await signInWithPopup(auth, googleProvider)
+    } catch (err) {
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        setError('Google 로그인에 실패했습니다.')
+      }
+    } finally {
       setLoading(false)
     }
   }
