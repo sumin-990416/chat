@@ -27,10 +27,9 @@ export default function Message({ msg, isOwn, showAvatar, memberCount, readCount
         </div>
       )}
       <div className="message-body">
-        {showAvatar && (
+        {showAvatar && !isOwn && (
           <div className="message-meta">
             <span className="message-name">{msg.displayName}</span>
-            <span className="message-time">{formatTime(msg.createdAt)}</span>
           </div>
         )}
         <div className="bubble-row">
