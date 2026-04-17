@@ -2,13 +2,9 @@ import { useState } from 'react'
 import {
   signInAnonymously,
   updateProfile,
-  GoogleAuthProvider,
-  signInWithRedirect,
 } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './AuthPage.css'
-
-const googleProvider = new GoogleAuthProvider()
 
 export default function AuthPage() {
   const [mode, setMode] = useState('google')
@@ -16,16 +12,23 @@ export default function AuthPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleGoogle = async () => {
+  const handleGoogle = () => {
     setError('')
     setLoading(true)
-    try {
-      await signInWithRedirect(auth, googleProvider)
-      // 이후 Google 페이지로 이동 → 복귀 시 App.jsx의 getRedirectResult → onAuthStateChanged 처리
-    } catch (err) {
-      setError(`Google 로그인에 실패했습니다. (${err.code})`)
+    // 새 탭에서 Google 로그인 처리 → Firebase auth state가 탭 간 자동 공유됨
+    const authWindow = window.open('/auth-google', '_blank', 'width=500,height=600')
+    if (!authWindow) {
+      setError('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.')
       setLoading(false)
+      return
     }
+    // 새 탭이 닫히면 로딩 상태 해제 (App.jsx onAuthStateChanged가 자동으로 라우팅 처리)
+    const timer = setInterval(() => {
+      if (authWindow.closed) {
+        clearInterval(timer)
+        setLoading(false)
+      }
+    }, 500)
   }
 
   const handleAnonymous = async (e) => {

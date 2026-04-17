@@ -6,6 +6,7 @@ import { useUserSync } from './hooks/useUserSync'
 import AuthPage from './pages/AuthPage'
 import ChatPage from './pages/ChatPage'
 import InvitePage from './pages/InvitePage'
+import GoogleAuthPage from './pages/GoogleAuthPage'
 import './App.css'
 
 function App() {
@@ -39,6 +40,10 @@ function App() {
         <Route
           path="/"
           element={user ? <Navigate to="/rooms" replace /> : <AuthPage />}
+        />
+        <Route
+          path="/auth-google"
+          element={<GoogleAuthPage />}
         />
         <Route
           path="/invite/:inviteCode"
