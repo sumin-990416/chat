@@ -1,6 +1,23 @@
-.chat-layout {
+/* ===== 전체 배경 ===== */
+.chat-wrapper {
   display: flex;
-  height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 20px;
+  background: radial-gradient(ellipse at top, #1a1040 0%, var(--bg) 60%);
+}
+
+/* ===== 메인 카드 ===== */
+.chat-card {
+  display: flex;
+  width: 90%;
+  max-width: 1200px;
+  height: 85vh;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
@@ -117,11 +134,12 @@
   align-items: center;
   justify-content: center;
   background: var(--bg);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 /* ===== 채팅 팝업 모달 ===== */
 .chat-backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   z-index: 50;
@@ -129,12 +147,12 @@
 }
 
 .chat-modal {
-  position: fixed;
+  position: absolute;
   top: 50%;
-  left: calc(260px + (100vw - 260px) / 2);
+  left: 50%;
   transform: translate(-50%, -50%);
-  width: min(80vw, calc(100vw - 300px));
-  height: 85vh;
+  width: 90%;
+  height: 90%;
   z-index: 51;
   background: var(--bg2);
   border-radius: var(--radius);

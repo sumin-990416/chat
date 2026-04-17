@@ -51,8 +51,9 @@ export default function ChatPage({ user }) {
   }
 
   return (
-    <div className="chat-layout">
-      <aside className="sidebar">
+    <div className="chat-wrapper">
+      <div className="chat-card">
+        <aside className="sidebar">
         <div className="sidebar-header">
           <button className="sidebar-avatar-btn" onClick={() => setProfileOpen(true)}>
             {user.photoURL
@@ -89,6 +90,7 @@ export default function ChatPage({ user }) {
       </main>
 
       {profileOpen && <ProfileModal user={user} onClose={() => setProfileOpen(false)} />}
+      </div>
     </div>
   )
 }
