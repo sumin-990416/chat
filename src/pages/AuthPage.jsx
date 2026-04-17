@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   signInAnonymously,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './AuthPage.css'
@@ -11,21 +12,25 @@ import './AuthPage.css'
 const googleProvider = new GoogleAuthProvider()
 
 export default function AuthPage() {
-  const [mode, setMode] = useState('google') // google | anonymous
+  const [mode, setMode] = useState('google')
   const [nickname, setNickname] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    getRedirectResult(auth)
+      .catch(() => setError('Google 로그인에 실패했습니다.'))
+      .finally(() => setLoading(false))
+  }, [])
 
   const handleGoogle = async () => {
     setError('')
     setLoading(true)
     try {
-      await signInWithPopup(auth, googleProvider)
-    } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Google 로그인에 실패했습니다.')
-      }
-    } finally {
+      await signInWithRedirect(auth, googleProvider)
+    } catch {
+      setError('Google 로그인에 실패했습니다.')
       setLoading(false)
     }
   }

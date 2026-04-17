@@ -12,7 +12,7 @@ import './ChatRoom.css'
 
 const MAX_FILE_MB = 10
 
-export default function ChatRoom({ user }) {
+export default function ChatRoom({ user, onClose }) {
   const { roomId } = useParams()
   const [room, setRoom] = useState(null)
   const [messages, setMessages] = useState([])
@@ -20,6 +20,8 @@ export default function ChatRoom({ user }) {
   const [sending, setSending] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const bottomRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -122,6 +124,14 @@ export default function ChatRoom({ user }) {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const filteredMessages = searchQuery.trim()
+    ? messages.filter(m =>
+        m.type === 'text'
+          ? m.content.toLowerCase().includes(searchQuery.toLowerCase())
+          : m.fileName?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : messages
+
   return (
     <div className="chatroom">
       <div className="chatroom-header">
@@ -130,18 +140,49 @@ export default function ChatRoom({ user }) {
         <button className="btn-invite" onClick={copyInviteLink} title="초대 링크 복사">
           {copied ? '✅ 복사됨' : '🔗 초대 링크'}
         </button>
+        <button
+          className={`chatroom-icon-btn ${searchOpen ? 'active' : ''}`}
+          onClick={() => { setSearchOpen(s => !s); setSearchQuery('') }}
+          title="검색"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        {onClose && (
+          <button className="chatroom-icon-btn" onClick={onClose} title="닫기">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        )}
       </div>
 
+      {searchOpen && (
+        <div className="chatroom-search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input
+            autoFocus
+            placeholder="메시지 또는 파일명 검색..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <span className="search-count">
+              {filteredMessages.length}건
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="chatroom-messages">
-        {messages.length === 0 && (
-          <div className="chatroom-empty">아직 메시지가 없습니다. 첫 메시지를 보내보세요!</div>
+        {filteredMessages.length === 0 && (
+          <div className="chatroom-empty">
+            {searchQuery ? '검색 결과가 없습니다.' : '아직 메시지가 없습니다. 첫 메시지를 보내보세요!'}
+          </div>
         )}
-        {messages.map((msg, i) => (
+        {filteredMessages.map((msg, i) => (
           <Message
             key={msg.id}
             msg={msg}
             isOwn={msg.uid === user.uid}
-            showAvatar={i === 0 || messages[i - 1]?.uid !== msg.uid}
+            showAvatar={i === 0 || filteredMessages[i - 1]?.uid !== msg.uid}
           />
         ))}
         <div ref={bottomRef} />

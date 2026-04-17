@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './firebase/config'
+import { useUserSync } from './hooks/useUserSync'
 import AuthPage from './pages/AuthPage'
 import ChatPage from './pages/ChatPage'
 import InvitePage from './pages/InvitePage'
@@ -14,6 +15,8 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u))
     return unsubscribe
   }, [])
+
+  useUserSync(user)
 
   if (user === undefined) {
     return (
