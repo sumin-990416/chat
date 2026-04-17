@@ -1,26 +1,27 @@
-import { useEffect } from 'react'
-import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth'
+import { useEffect, useState } from 'react'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { auth } from '../firebase/config'
 
 const googleProvider = new GoogleAuthProvider()
 
-// 이 페이지는 새 탭에서 열려 Google 로그인을 처리하고 자동으로 닫힘
-// 원본 탭은 onAuthStateChanged로 로그인 상태를 감지
+// 이 페이지는 새 탭에서 열려 signInWithPopup으로 Google 로그인 처리 후 자동으로 닫힘
+// 새 탭(window.open으로 열림)은 COOP 제한 없이 popup 사용 가능
 export default function GoogleAuthPage() {
+  const [status, setStatus] = useState('loading')
+
   useEffect(() => {
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result) {
-          // 로그인 성공 → 탭 닫기
-          window.close()
-        } else {
-          // 아직 redirect 안 된 상태 → Google로 redirect
-          signInWithRedirect(auth, googleProvider)
-        }
-      })
-      .catch(() => {
-        // 에러 시에도 탭 닫기
+    signInWithPopup(auth, googleProvider)
+      .then(() => {
+        setStatus('success')
         window.close()
+      })
+      .catch((err) => {
+        if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+          setStatus('cancelled')
+        } else {
+          setStatus('error')
+        }
+        setTimeout(() => window.close(), 1500)
       })
   }, [])
 
