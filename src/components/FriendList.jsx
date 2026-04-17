@@ -18,10 +18,11 @@ function Avatar({ photoURL, name, size = 32 }) {
 
 export default function FriendList({ user }) {
   const [searchName, setSearchName] = useState('')
-  const [searchResults, setSearchResults] = useState(null) // null | [] 
+  const [searchResults, setSearchResults] = useState(null)
   const [searching, setSearching] = useState(false)
   const [pendingIn, setPendingIn] = useState([])
   const [friends, setFriends] = useState([])
+  const [modalOpen, setModalOpen] = useState(false)
 
   // 받은 친구 요청
   useEffect(() => {
@@ -102,31 +103,14 @@ export default function FriendList({ user }) {
     await updateDoc(doc(db, 'friendRequests', req.id), { status: 'rejected' })
   }
 
+  const closeModal = () => {
+    setModalOpen(false)
+    setSearchName('')
+    setSearchResults(null)
+  }
+
   return (
     <div className="friend-list">
-      <form className="friend-search-form" onSubmit={handleSearch}>
-        <input
-          type="text"
-          placeholder="이름으로 친구 찾기"
-          value={searchName}
-          onChange={e => setSearchName(e.target.value)}
-        />
-        <button type="submit" className="btn-primary f-search-btn" disabled={searching}>
-          {searching ? '...' : '검색'}
-        </button>
-      </form>
-
-      {searchResults !== null && searchResults.length === 0 && (
-        <p className="f-not-found">사용자를 찾을 수 없습니다.</p>
-      )}
-      {searchResults && searchResults.length > 0 && searchResults.map(result => (
-        <div key={result.id} className="f-result">
-          <Avatar photoURL={result.photoURL} name={result.displayName} />
-          <span className="f-name">{result.displayName}</span>
-          <button className="btn-primary f-add-btn" onClick={() => sendRequest(result)}>추가</button>
-        </div>
-      ))}
-
       {pendingIn.length > 0 && (
         <div className="f-section">
           <span className="f-section-label">친구 요청 ({pendingIn.length})</span>
@@ -153,6 +137,43 @@ export default function FriendList({ user }) {
           </div>
         ))}
       </div>
+
+      <button className="f-add-friend-btn" onClick={() => setModalOpen(true)}>+ 친구 추가</button>
+
+      {modalOpen && (
+        <div className="f-modal-backdrop" onClick={closeModal}>
+          <div className="f-modal" onClick={e => e.stopPropagation()}>
+            <div className="f-modal-header">
+              <h3>친구 추가</h3>
+              <button className="f-modal-close" onClick={closeModal}>✕</button>
+            </div>
+            <form className="f-modal-search" onSubmit={handleSearch}>
+              <input
+                autoFocus
+                type="text"
+                placeholder="이름으로 검색..."
+                value={searchName}
+                onChange={e => setSearchName(e.target.value)}
+              />
+              <button type="submit" className="btn-primary f-search-btn" disabled={searching}>
+                {searching ? '...' : '검색'}
+              </button>
+            </form>
+            <div className="f-modal-results">
+              {searchResults !== null && searchResults.length === 0 && (
+                <p className="f-not-found">사용자를 찾을 수 없습니다.</p>
+              )}
+              {searchResults && searchResults.length > 0 && searchResults.map(result => (
+                <div key={result.id} className="f-result">
+                  <Avatar photoURL={result.photoURL} name={result.displayName} />
+                  <span className="f-name">{result.displayName}</span>
+                  <button className="btn-primary f-add-btn" onClick={() => sendRequest(result)}>추가</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
