@@ -2,9 +2,13 @@ import { useState } from 'react'
 import {
   signInAnonymously,
   updateProfile,
+  GoogleAuthProvider,
+  signInWithRedirect,
 } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './AuthPage.css'
+
+const googleProvider = new GoogleAuthProvider()
 
 export default function AuthPage() {
   const [mode, setMode] = useState('google')
@@ -12,23 +16,18 @@ export default function AuthPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleGoogle = () => {
+  const handleGoogle = async () => {
     setError('')
     setLoading(true)
-    // 새 탭에서 Google 로그인 처리 → Firebase auth state가 탭 간 자동 공유됨
-    const authWindow = window.open('/auth-google', '_blank', 'width=500,height=600')
-    if (!authWindow) {
-      setError('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.')
+    try {
+      // localStorage 플래그 저장 → 복귀 시 App.jsx에서 감지해 로그인 페이지 플래시 방지
+      localStorage.setItem('googleLoginPending', '1')
+      await signInWithRedirect(auth, googleProvider)
+    } catch (err) {
+      localStorage.removeItem('googleLoginPending')
+      setError(`Google 로그인에 실패했습니다. (${err.code})`)
       setLoading(false)
-      return
     }
-    // 새 탭이 닫히면 로딩 상태 해제 (App.jsx onAuthStateChanged가 자동으로 라우팅 처리)
-    const timer = setInterval(() => {
-      if (authWindow.closed) {
-        clearInterval(timer)
-        setLoading(false)
-      }
-    }, 500)
   }
 
   const handleAnonymous = async (e) => {
