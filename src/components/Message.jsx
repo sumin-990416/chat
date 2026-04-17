@@ -72,7 +72,6 @@ export default function Message({ msg, isOwn, showAvatar, memberCount, readCount
           )}
         </div>
       </div>
-      {isOwn && <div className="avatar own-avatar">{getInitial(msg.displayName)}</div>}
     </div>
   )
 }
