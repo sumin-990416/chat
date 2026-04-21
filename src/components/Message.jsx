@@ -39,6 +39,11 @@ export default function Message({ msg, isOwn, showAvatar, memberCount, readCount
               <p>{msg.content}</p>
             </div>
           )}
+          {msg.type === 'image' && (
+            <div className="bubble image-bubble">
+              <img src={msg.content} alt="이미지" style={{ maxWidth: '280px', maxHeight: '280px', borderRadius: '8px', display: 'block' }} />
+            </div>
+          )}
           {!isOwn && (
             <div className="bubble-side">
               {unread > 0 && <span className="unread-count">{unread}</span>}

@@ -15,6 +15,7 @@ export default function ChatRoom({ user, onClose }) {
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
+  const [pasteUploading, setPasteUploading] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [inviteOpen, setInviteOpen] = useState(false)
@@ -97,6 +98,52 @@ export default function ChatRoom({ user, onClose }) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       sendMessage(e)
+    }
+  }
+
+  const compressImageToBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const MAX = 800
+        let { width, height } = img
+        if (width > MAX || height > MAX) {
+          if (width > height) { height = Math.round(height * MAX / width); width = MAX }
+          else { width = Math.round(width * MAX / height); height = MAX }
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', 0.75))
+      }
+      img.onerror = reject
+      img.src = url
+    })
+
+  const handlePaste = async (e) => {
+    const items = Array.from(e.clipboardData?.items || [])
+    const imageItem = items.find(i => i.type.startsWith('image/'))
+    if (!imageItem) return
+    e.preventDefault()
+    const file = imageItem.getAsFile()
+    if (!file) return
+    setPasteUploading(true)
+    try {
+      const base64 = await compressImageToBase64(file)
+      await addDoc(collection(db, 'rooms', roomId, 'messages'), {
+        type: 'image',
+        content: base64,
+        uid: user.uid,
+        displayName: user.displayName || '익명',
+        createdAt: serverTimestamp(),
+      })
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setPasteUploading(false)
     }
   }
 
@@ -217,12 +264,14 @@ export default function ChatRoom({ user, onClose }) {
       <form className="chatroom-input-area" onSubmit={sendMessage}>
         <textarea
           className="chatroom-input"
-          placeholder="메시지를 입력하세요... (Shift+Enter: 줄바꿈)"
+          placeholder={pasteUploading ? '이미지 전송 중...' : '메시지를 입력하세요... (Shift+Enter: 줄바꿈)'}
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           rows={1}
           maxLength={2000}
+          disabled={pasteUploading}
         />
         <button type="submit" className="btn-send" disabled={!text.trim() || sending}>
           ➤
