@@ -56,6 +56,32 @@
   font-weight: 600;
 }
 
+.room-actions {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.room-item:hover .room-actions {
+  display: flex;
+}
+
+.room-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 3px 5px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+.room-action-btn:hover { color: var(--text); background: var(--bg2); }
+.room-action-btn.danger:hover { color: var(--danger); background: rgba(255,77,109,0.1); }
+
 .room-hash {
   opacity: 0.5;
   font-size: 1rem;
