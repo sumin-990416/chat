@@ -58,3 +58,6 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: chat-78229
+
+      - name: Deploy Firestore Rules
+        run: npx firebase-tools@latest deploy --only firestore:rules --project chat-78229 --token "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" 2>/dev/null || true
