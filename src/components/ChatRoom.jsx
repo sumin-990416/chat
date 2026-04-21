@@ -24,14 +24,21 @@ export default function ChatRoom({ user, onClose }) {
   const [friends, setFriends] = useState([])
   const bottomRef = useRef(null)
 
-  /* 방 정보 구독 */
+  /* 방 정보 구독 + 자동 members 추가 */
   useEffect(() => {
     if (!roomId) return
     const unsub = onSnapshot(doc(db, 'rooms', roomId), (snap) => {
-      if (snap.exists()) setRoom({ id: snap.id, ...snap.data() })
+      if (snap.exists()) {
+        const data = snap.data()
+        setRoom({ id: snap.id, ...data })
+        // members 배열에 없으면 자동 추가
+        if (user.uid && !(data.members || []).includes(user.uid)) {
+          updateDoc(snap.ref, { members: arrayUnion(user.uid) }).catch(() => {})
+        }
+      }
     })
     return unsub
-  }, [roomId])
+  }, [roomId, user.uid])
 
   /* 메시지 구독 */
   useEffect(() => {
@@ -89,6 +96,10 @@ export default function ChatRoom({ user, onClose }) {
         displayName: user.displayName || '익명',
         createdAt: serverTimestamp(),
       })
+    } catch (err) {
+      console.error('sendMessage error:', err?.code, err?.message)
+      setText(content)
+      alert(`전송 실패: ${err?.code || err?.message}`)
     } finally {
       setSending(false)
     }
