@@ -120,7 +120,9 @@ export default function ChatRoom({ user, onClose }) {
     setUploadProgress(0)
     try {
       await uploadBytes(storageRef, file)
+      setUploadProgress(80)
       const url = await getDownloadURL(storageRef)
+      setUploadProgress(95)
       const isImage = file.type.startsWith('image/')
 
       await addDoc(collection(db, 'rooms', roomId, 'messages'), {
@@ -133,7 +135,10 @@ export default function ChatRoom({ user, onClose }) {
         createdAt: serverTimestamp(),
       })
     } catch (err) {
-      alert('파일 업로드에 실패했습니다.')
+      const msg = err?.code === 'storage/unauthorized'
+        ? 'Storage 권한이 없습니다. Firebase Console에서 Storage 규칙을 설정해주세요.'
+        : `파일 업로드에 실패했습니다. (${err?.code || err?.message})`
+      alert(msg)
       console.error(err)
     } finally {
       setUploadProgress(null)
